@@ -10,7 +10,7 @@ export function Login() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [loginType, setLoginType] = useState<'admin' | 'staff'>('admin');
-    const { login } = useAuth();
+    const { login, logout } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -19,25 +19,43 @@ export function Login() {
         setIsLoading(true);
 
         try {
-            await login(username, password);
+            const user = await login(username, password);
+
+            // Enforce Role Separation
+            if (loginType === 'admin' && user.role !== 'ADMIN') {
+                logout();
+                throw new Error('Access Denied: Owners Only area.');
+            }
+
+            if (loginType === 'staff' && user.role !== 'STAFF') {
+                // If an Admin tries to login as Staff, we technically could allow it, 
+                // but user requested "staff use only staff side". 
+                // We'll restrict it to strictly STAFF role for this tabs.
+                // Or if user.role is ADMIN, maybe allow? 
+                // Let's stick to strict separation as requested.
+                // Except usually Admins ARE Staff. But let's assume 'STAFF' role.
+                if (user.role !== 'ADMIN') { // Fallback, maybe Admin can enter Staff area? 
+                    // Let's enforce strict:
+                }
+                logout();
+                throw new Error('Access Denied: Staff Only area.');
+            }
+
             navigate('/');
-        } catch (err) {
-            setError('Invalid username or password');
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || 'Invalid username or password');
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Demo credentials helper
-    const setDemoCredentials = (type: 'admin' | 'staff') => {
-        if (type === 'admin') {
-            setUsername('mfp_vadamadurai_admin');
-            setPassword('mfp_vadamadurai_admin_password');
-        } else {
-            setUsername('');
-            setPassword('');
-        }
+    // Handle Tab Change
+    const handleLoginTypeChange = (type: 'admin' | 'staff') => {
         setLoginType(type);
+        setUsername('');
+        setPassword('');
+        setError('');
     };
 
     return (
@@ -56,7 +74,7 @@ export function Login() {
                     <button
                         type="button"
                         className={`filter-btn ${loginType === 'admin' ? 'active' : ''}`}
-                        onClick={() => setDemoCredentials('admin')}
+                        onClick={() => handleLoginTypeChange('admin')}
                         style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                     >
                         <Shield size={16} />
@@ -65,7 +83,7 @@ export function Login() {
                     <button
                         type="button"
                         className={`filter-btn ${loginType === 'staff' ? 'active' : ''}`}
-                        onClick={() => setDemoCredentials('staff')}
+                        onClick={() => handleLoginTypeChange('staff')}
                         style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                     >
                         <User size={16} />
@@ -112,11 +130,10 @@ export function Login() {
                 {loginType === 'admin' && (
                     <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--bg-card-hover)', borderRadius: '8px', borderLeft: '3px solid var(--primary)' }}>
                         <p style={{ fontSize: '0.75rem', marginBottom: '0.5rem', color: 'var(--primary)', fontWeight: 600 }}>
-                            ADMIN CREDENTIALS
+                            OWNER LOGIN
                         </p>
-                        <p className="text-secondary" style={{ fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                            mfp_vadamadurai_admin<br />
-                            mfp_vadamadurai_admin_password
+                        <p className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                            Please enter your credentials to access the owner dashboard.
                         </p>
                     </div>
                 )}
