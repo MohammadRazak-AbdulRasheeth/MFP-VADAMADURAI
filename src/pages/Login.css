@@ -6,86 +6,130 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at top right, #1a1a1a 0%, #000000 100%);
-    position: relative;
+    background: #000;
+    padding: 0;
     overflow: hidden;
-    padding: 1rem;
 }
 
-/* Background Ambient Glow */
-#root .login-page::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at center, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
-    animation: rotateGlow 60s linear infinite;
-    pointer-events: none;
+/* Split Layout Container */
+#root .login-split-screen {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    background: #000;
 }
 
-#root .login-page::after {
+/* Left Side: Brand/Image (Desktop) */
+#root .login-brand-section {
+    flex: 1.2;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem;
+    background: linear-gradient(135deg, #111 0%, #000 100%);
+    overflow: hidden;
+}
+
+/* Background Effect for Brand Section */
+#root .login-brand-section::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
-    pointer-events: none;
-    z-index: 0;
+    background: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+    opacity: 0.4;
+    filter: grayscale(100%) contrast(1.2);
+    z-index: 1;
 }
 
-@keyframes rotateGlow {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
+#root .login-brand-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.9));
+    z-index: 2;
 }
 
+#root .brand-content {
+    position: relative;
+    z-index: 3;
+    text-align: left;
+    max-width: 600px;
+}
+
+#root .brand-content h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+}
+
+#root .brand-content .text-gold {
+    color: #D4AF37;
+    display: block;
+}
+
+#root .brand-content p {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 300;
+    max-width: 480px;
+}
+
+/* Right Side: Form (Desktop) */
+#root .login-form-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    position: relative;
+    padding: 2rem;
+}
+
+/* Form Container */
 #root .login-card {
     width: 100%;
-    max-width: 440px;
-    padding: 3rem 2.5rem;
-    position: relative;
-    z-index: 10;
-    background: rgba(18, 18, 18, 0.6);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6),
-        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    margin: 0;
-    /* Reset margin */
-}
-
-#root .login-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(212, 175, 55, 0.2) inset;
-    border-color: rgba(212, 175, 55, 0.3);
+    max-width: 480px;
+    padding: 3rem;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 #root .login-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
+    text-align: left;
+    margin-bottom: 3rem;
 }
 
+#root .login-header h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+#root .login-header p {
+    color: #666;
+}
+
+/* Logo handling */
 #root .login-icon {
+    display: none;
+    /* Hidden on desktop split screen */
     width: 90px;
     height: 90px;
     margin: 0 auto 1.5rem;
-    display: flex;
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
@@ -100,23 +144,74 @@
     filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5));
 }
 
-/* Responsive Adjustments */
-@media (max-width: 640px) {
+/* Custom Input Styles */
+#root .form-input {
+    background: #111;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 1rem;
+    height: auto;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+#root .form-input:focus {
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
+    background: #161616;
+}
+
+#root .form-label {
+    color: #888;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+/* Filter Buttons */
+#root .filter-btn {
+    background: #111;
+    border: 1px solid #333;
+    color: #888;
+    padding: 1rem;
+    font-weight: 500;
+}
+
+#root .filter-btn.active {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: #D4AF37;
+    color: #D4AF37;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+    #root .login-brand-section {
+        display: none;
+    }
+
+    #root .login-split-screen {
+        background: radial-gradient(circle at top right, #111 0%, #000 100%);
+    }
+
     #root .login-card {
-        padding: 2rem 1.5rem;
+        padding: 2rem;
         max-width: 100%;
-        margin: 1rem;
+        background: rgba(18, 18, 18, 0.5);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 20px;
-        background: rgba(18, 18, 18, 0.85);
+        margin: 1rem;
+    }
+
+    #root .login-header {
+        text-align: center;
     }
 
     #root .login-icon {
-        width: 80px;
-        height: 80px;
-        margin-bottom: 1rem;
-    }
-
-    #root .login-header h2 {
-        font-size: 1.5rem;
+        display: flex;
+        /* Show on mobile */
+        margin: 0 auto 1.5rem;
     }
 }
