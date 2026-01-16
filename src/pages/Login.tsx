@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
+import './Login.css';
 
 export function Login() {
     const [username, setUsername] = useState('');
