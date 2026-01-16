@@ -56,7 +56,7 @@ export function AnalyticsCharts({ data, loading }: AnalyticsChartsProps) {
                                 outerRadius={100}
                                 paddingAngle={2}
                                 dataKey="value"
-                                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                                label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
                                 labelLine={false}
                             >
                                 {data.packageDistribution.map((_, index) => (
@@ -67,7 +67,8 @@ export function AnalyticsCharts({ data, loading }: AnalyticsChartsProps) {
                                 // @ts-ignore
                                 contentStyle={tooltipStyle}
                                 itemStyle={{ color: 'var(--text-primary)' }}
-                                formatter={(value: number, name: string, props: any) => [
+                                // @ts-ignore
+                                formatter={(value: any, name: string, props: any) => [
                                     `${value} members (${formatCurrency(props.payload.revenue)})`,
                                     props.payload.name
                                 ]}

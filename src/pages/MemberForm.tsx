@@ -52,6 +52,7 @@ export function MemberForm() {
                         trainerId: member.trainerId || '',
                         discountType: (member as any).discountType || 'NONE',
                         discountAmount: ((member as any).discountAmount || 0).toString(),
+                        paymentMethod: 'CASH',
                     });
                 })
                 .catch(err => {
@@ -119,7 +120,6 @@ export function MemberForm() {
                 packageEnd: calculateEndDate(),
                 amountPaid: amountPaid,
                 trainerId: formData.trainerId || undefined,
-                discountType: formData.discountType,
                 discountType: formData.discountType,
                 discountAmount: discountAmount,
                 paymentMethod: formData.paymentMethod,
