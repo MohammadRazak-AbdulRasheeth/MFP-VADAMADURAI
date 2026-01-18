@@ -11,11 +11,13 @@ router.post('/login', async (req, res) => {
         const user = await User.findOne({ username: username.toLowerCase(), isActive: true });
 
         if (!user) {
+            console.log(`Login attempt failed: User '${username}' not found or inactive`);
             return res.status(401).json({ message: 'Invalid username or password' });
         }
 
         // Simple password check (in production, use bcrypt!)
         if (user.password !== password) {
+            console.log(`Login attempt failed: Invalid password for user '${username}'`);
             return res.status(401).json({ message: 'Invalid username or password' });
         }
 
