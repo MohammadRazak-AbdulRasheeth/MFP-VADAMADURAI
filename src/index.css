@@ -631,11 +631,35 @@ h4 {
 /* ===== Tables - Premium Dark ===== */
 .table-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Custom scrollbar for table */
+.table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: var(--bg-card);
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.5);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 800px;
+  /* Ensure table has minimum width for proper layout */
 }
 
 .table th,
@@ -643,6 +667,7 @@ h4 {
   padding: 1rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 
 .table th {
@@ -654,6 +679,9 @@ h4 {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .table tr:hover {
@@ -2007,6 +2035,8 @@ input[type="datetime-local"]::before {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  max-width: 100%;
 }
 
 /* ===== SHIMMER EFFECT (for Pay Now button) ===== */

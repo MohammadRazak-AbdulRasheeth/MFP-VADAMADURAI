@@ -159,8 +159,8 @@ export function Members() {
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expiring' | 'expired' | 'dues'>('all');
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
-    // Responsive State
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    // Responsive State - Use card view for tablets and mobile (below 1200px)
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1200);
 
     // Payment Modal State
     const [paymentModal, setPaymentModal] = useState<{ show: boolean; member: Member | null }>({ show: false, member: null });
@@ -177,7 +177,7 @@ export function Members() {
 
     // Handle window resize
     useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        const handleResize = () => setIsMobile(window.innerWidth < 1200);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
