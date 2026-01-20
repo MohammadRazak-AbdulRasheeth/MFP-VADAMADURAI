@@ -215,7 +215,7 @@ h4 {
   }
 }
 
-/* ===== Sidebar - Professional Responsive ===== */
+/* ===== Sidebar - Professional Fully Scrollable ===== */
 .sidebar {
   background: linear-gradient(180deg, #0B0B0B 0%, #141414 100%);
   border-right: 1px solid #262626;
@@ -229,6 +229,7 @@ h4 {
   transition: all 0.3s ease;
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Desktop: Full Sidebar (1024px+) */
@@ -383,12 +384,12 @@ h4 {
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #334155;
   margin-bottom: 1.5rem;
-  flex-shrink: 0;
 }
 
 .sidebar-footer {
-  flex-shrink: 0;
-  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+  margin-top: 1.5rem;
 }
 
 .sidebar-logo img {
@@ -407,28 +408,28 @@ h4 {
 }
 
 .sidebar-nav {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   padding-right: 0.5rem;
   margin-right: -0.5rem;
 }
 
-/* Custom scrollbar for sidebar nav */
-.sidebar-nav::-webkit-scrollbar {
+/* Custom scrollbar for entire sidebar */
+.sidebar::-webkit-scrollbar {
   width: 6px;
 }
 
-.sidebar-nav::-webkit-scrollbar-track {
+.sidebar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.sidebar-nav::-webkit-scrollbar-thumb {
+.sidebar::-webkit-scrollbar-thumb {
   background: rgba(212, 175, 55, 0.3);
   border-radius: 3px;
 }
 
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
+.sidebar::-webkit-scrollbar-thumb:hover {
   background: rgba(212, 175, 55, 0.5);
 }
 
