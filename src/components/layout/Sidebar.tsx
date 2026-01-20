@@ -28,7 +28,7 @@ export function Sidebar() {
     // Close sidebar when clicking outside (mobile)
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth > 1024) {
+            if (window.innerWidth > 767) {
                 setIsOpen(false);
             }
         };
