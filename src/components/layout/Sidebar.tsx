@@ -92,7 +92,7 @@ export function Sidebar() {
                     ))}
                 </nav>
 
-                <div style={{ borderTop: '1px solid #334155', paddingTop: '1rem' }}>
+                <div className="sidebar-footer" style={{ borderTop: '1px solid #334155', paddingTop: '1rem', marginTop: 'auto' }}>
                     <ThemeToggle />
                     <div className="nav-item" style={{ marginBottom: '0.5rem' }}>
                         <UserCircle size={20} />
