@@ -180,7 +180,7 @@ h4 {
   .main-content {
     margin-left: 0;
     padding: 1.5rem;
-    padding-top: 80px !important;
+    padding-top: 90px !important;
     /* Space for mobile header */
     max-width: 100%;
   }
@@ -191,7 +191,7 @@ h4 {
   .main-content {
     margin-left: 0;
     padding: 1rem;
-    padding-top: 80px !important;
+    padding-top: 90px !important;
     /* Space for mobile header */
     max-width: 100%;
   }
@@ -201,21 +201,8 @@ h4 {
 @media (max-width: 480px) {
   .main-content {
     padding: 0.75rem;
-  }
-}
-
-/* Mobile: Full Width (below 768px) */
-@media (max-width: 767px) {
-  .main-content {
-    margin-left: 0;
-    padding: 1rem;
-  }
-}
-
-/* Extra Small Mobile: Minimal Padding (480px and below) */
-@media (max-width: 480px) {
-  .main-content {
-    padding: 0.75rem;
+    padding-top: 90px !important;
+    /* Extra space for mobile header */
   }
 }
 
