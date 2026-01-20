@@ -258,6 +258,7 @@ export function MemberForm() {
                                         packageStart: !isEditing ? val : prev.packageStart
                                     }));
                                 }}
+                                style={{ cursor: 'pointer', minHeight: '44px' }}
                                 required
                             />
                         </div>
@@ -286,6 +287,7 @@ export function MemberForm() {
                                 className="form-input"
                                 value={formData.packageStart}
                                 onChange={handleChange}
+                                style={{ cursor: 'pointer', minHeight: '44px' }}
                                 required
                             />
                         </div>
@@ -296,7 +298,7 @@ export function MemberForm() {
                                 className="form-input"
                                 value={calculateEndDate()}
                                 disabled
-                                style={{ opacity: 0.7 }}
+                                style={{ opacity: 0.7, cursor: 'not-allowed', minHeight: '44px' }}
                             />
                         </div>
                     </div>

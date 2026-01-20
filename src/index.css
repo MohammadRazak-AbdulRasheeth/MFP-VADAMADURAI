@@ -588,6 +588,20 @@ h4 {
   color: var(--text-muted);
 }
 
+/* Date Input Styling */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  width: 100%;
+  cursor: pointer;
+}
+
+input[type="date"]::before,
+input[type="time"]::before,
+input[type="datetime-local"]::before {
+  content: attr(placeholder);
+}
+
 .form-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -611,9 +625,17 @@ h4 {
   
   .form-input,
   .form-select {
-    padding: 0.75rem 0.875rem;
-    font-size: 0.875rem;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    min-height: 44px;
     box-sizing: border-box;
+  }
+  
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    padding: 0.875rem 1rem !important;
+    min-height: 44px !important;
   }
   
   .page-title {
@@ -635,8 +657,16 @@ h4 {
   
   .form-input,
   .form-select {
-    padding: 0.65rem 0.75rem;
-    font-size: 0.8125rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    min-height: 44px;
+  }
+  
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    padding: 0.75rem 1rem !important;
+    min-height: 44px !important;
   }
   
   .page-title {
