@@ -154,15 +154,15 @@ export function MemberForm() {
     return (
         <div className="animate-in">
             <div className="page-header">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4" style={{ width: '100%', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
                     <LinkButton to="/members" variant="secondary">
                         <ArrowLeft size={18} />
                     </LinkButton>
-                    <h1 className="page-title">{isEditing ? 'Edit Member' : 'Add New Member'}</h1>
+                    <h1 className="page-title" style={{ flex: 1, margin: 0 }}>{isEditing ? 'Edit Member' : 'Add New Member'}</h1>
                 </div>
             </div>
 
-            <div className="card" style={{ maxWidth: '800px' }}>
+            <div className="card" style={{ maxWidth: '800px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
                 {error && (
                     <div className="badge badge-danger" style={{ display: 'block', marginBottom: '1rem', padding: '0.75rem' }}>
                         {error}
@@ -394,32 +394,34 @@ export function MemberForm() {
                     <div style={{
                         background: 'var(--bg-card-hover)',
                         borderRadius: '8px',
-                        padding: '1rem',
+                        padding: isMobile ? '0.75rem' : '1rem',
                         marginTop: '1rem',
                         display: 'grid',
                         gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
-                        gap: '1rem'
+                        gap: isMobile ? '0.75rem' : '1rem',
+                        boxSizing: 'border-box'
                     }}>
-                        <div>
-                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Price</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>₹{packagePrice.toLocaleString()}</div>
+                        <div style={{ overflow: 'hidden' }}>
+                            <div className="text-muted" style={{ fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Price</div>
+                            <div style={{ fontSize: isMobile ? '1rem' : '1.25rem', fontWeight: 600, wordBreak: 'break-word' }}>₹{packagePrice.toLocaleString()}</div>
                         </div>
-                        <div>
-                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Discount</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--danger)' }}>-₹{discountAmount.toLocaleString()}</div>
+                        <div style={{ overflow: 'hidden' }}>
+                            <div className="text-muted" style={{ fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Discount</div>
+                            <div style={{ fontSize: isMobile ? '1rem' : '1.25rem', fontWeight: 600, color: 'var(--danger)', wordBreak: 'break-word' }}>-₹{discountAmount.toLocaleString()}</div>
                         </div>
-                        <div>
-                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Amount Paid</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--secondary)' }}>
+                        <div style={{ overflow: 'hidden' }}>
+                            <div className="text-muted" style={{ fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Amount Paid</div>
+                            <div style={{ fontSize: isMobile ? '1rem' : '1.25rem', fontWeight: 600, color: 'var(--secondary)', wordBreak: 'break-word' }}>
                                 ₹{amountPaid.toLocaleString()}
                             </div>
                         </div>
-                        <div>
-                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Balance Due</div>
+                        <div style={{ overflow: 'hidden' }}>
+                            <div className="text-muted" style={{ fontSize: isMobile ? '0.65rem' : '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Balance Due</div>
                             <div style={{
-                                fontSize: '1.25rem',
+                                fontSize: isMobile ? '1rem' : '1.25rem',
                                 fontWeight: 600,
-                                color: balanceDue > 0 ? 'var(--danger)' : 'var(--secondary)'
+                                color: balanceDue > 0 ? 'var(--danger)' : 'var(--secondary)',
+                                wordBreak: 'break-word'
                             }}>
                                 ₹{balanceDue.toLocaleString()}
                             </div>
@@ -437,12 +439,12 @@ export function MemberForm() {
                     </div>
 
                     {/* Submit Button */}
-                    <div className="flex gap-4" style={{ marginTop: '2rem' }}>
-                        <Button type="submit" disabled={isSubmitting}>
+                    <div className="flex gap-4" style={{ marginTop: '2rem', flexDirection: isMobile ? 'column' : 'row' }}>
+                        <Button type="submit" disabled={isSubmitting} style={{ flex: isMobile ? 1 : 'auto' }}>
                             <Save size={18} />
                             {isSubmitting ? 'Saving...' : (isEditing ? 'Update Member' : 'Add Member')}
                         </Button>
-                        <LinkButton to="/members" variant="secondary">
+                        <LinkButton to="/members" variant="secondary" style={{ flex: isMobile ? 1 : 'auto' }}>
                             Cancel
                         </LinkButton>
                     </div>

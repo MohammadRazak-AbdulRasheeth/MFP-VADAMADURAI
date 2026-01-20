@@ -613,6 +613,38 @@ h4 {
   .form-select {
     padding: 0.75rem 0.875rem;
     font-size: 0.875rem;
+    box-sizing: border-box;
+  }
+  
+  .page-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .card {
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-label {
+    font-size: 0.75rem;
+  }
+  
+  .form-input,
+  .form-select {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+  
+  .page-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .card {
+    padding: 0.75rem;
   }
 }
 
@@ -1792,7 +1824,7 @@ h4 {
 /* ===== MAIN CONTENT RESPONSIVE ===== */
 @media (max-width: 480px) {
   .main-content {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
 
   .card {
