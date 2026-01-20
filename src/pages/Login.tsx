@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Shield, Eye, EyeOff } from 'lucide-react';
+import { User, Shield, Eye, EyeOff, Download, Share } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import './Login.css';
@@ -14,6 +14,57 @@ export function Login() {
     const [loginType, setLoginType] = useState<'admin' | 'staff'>('admin');
     const { login, logout } = useAuth();
     const navigate = useNavigate();
+
+    // PWA Install State
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [showInstallButton, setShowInstallButton] = useState(false);
+    const [isIOS, setIsIOS] = useState(false);
+    const [isInstalled, setIsInstalled] = useState(false);
+
+    // Check if app is installed and listen for install prompt
+    useEffect(() => {
+        // Check if running as standalone PWA
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+            || (window.navigator as any).standalone === true;
+        setIsInstalled(isStandalone);
+
+        // Check if iOS
+        const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+        setIsIOS(isIOSDevice);
+
+        // Show install button for iOS if not installed
+        if (isIOSDevice && !isStandalone) {
+            setShowInstallButton(true);
+        }
+
+        // Listen for beforeinstallprompt (Android/Chrome)
+        const handleBeforeInstall = (e: any) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+            setShowInstallButton(true);
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+        window.addEventListener('appinstalled', () => {
+            setShowInstallButton(false);
+            setIsInstalled(true);
+        });
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+        };
+    }, []);
+
+    const handleInstallClick = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                setShowInstallButton(false);
+            }
+            setDeferredPrompt(null);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -178,6 +229,63 @@ export function Login() {
                                 <p className="text-muted" style={{ fontSize: '0.75rem' }}>
                                     Staff accounts are created by the Owner. Contact your gym admin for login credentials.
                                 </p>
+                            </div>
+                        )}
+
+                        {/* Install App Button - Only shows if not installed */}
+                        {showInstallButton && !isInstalled && (
+                            <div style={{
+                                marginTop: '1.5rem',
+                                padding: '1rem',
+                                background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05))',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(212, 175, 55, 0.3)'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                                    <Download size={20} style={{ color: '#D4AF37' }} />
+                                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#D4AF37' }}>
+                                        Install MFP Gym App
+                                    </span>
+                                </div>
+
+                                {isIOS ? (
+                                    <div>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                                            To install on iPhone:
+                                        </p>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                            <span>1. Tap</span>
+                                            <Share size={14} style={{ color: '#D4AF37' }} />
+                                            <span>Share button</span>
+                                        </div>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                                            2. Select "Add to Home Screen"
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={handleInstallClick}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.625rem 1rem',
+                                            background: 'linear-gradient(135deg, #D4AF37, #B8962E)',
+                                            border: 'none',
+                                            borderRadius: '6px',
+                                            color: '#000',
+                                            fontWeight: 600,
+                                            fontSize: '0.8rem',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0.5rem',
+                                            transition: 'all 0.2s ease'
+                                        }}
+                                    >
+                                        <Download size={16} />
+                                        Install App
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

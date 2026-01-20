@@ -802,17 +802,17 @@ input[type="datetime-local"]::before {
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .form-group {
     margin-bottom: 1rem;
   }
-  
+
   .form-label {
     font-size: 0.8125rem;
     margin-bottom: 0.4rem;
     word-break: break-word;
   }
-  
+
   .form-input,
   .form-select {
     padding: 0.875rem 1rem;
@@ -820,18 +820,38 @@ input[type="datetime-local"]::before {
     min-height: 44px;
     box-sizing: border-box;
   }
-  
+
   input[type="date"],
   input[type="time"],
   input[type="datetime-local"] {
     padding: 0.875rem 1rem !important;
     min-height: 44px !important;
+    /* iOS Safari fixes */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden;
   }
-  
+
+  /* Ensure form-group doesn't overflow */
+  .form-group {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Fix form-row on mobile to prevent overflow */
+  .form-row {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
   .page-title {
     font-size: 1.5rem !important;
   }
-  
+
   .card {
     padding: 1rem;
     border-radius: var(--radius-sm);
@@ -844,25 +864,33 @@ input[type="datetime-local"]::before {
   .form-label {
     font-size: 0.75rem;
   }
-  
+
   .form-input,
   .form-select {
     padding: 0.75rem 1rem;
     font-size: 0.95rem;
     min-height: 44px;
   }
-  
+
   input[type="date"],
   input[type="time"],
   input[type="datetime-local"] {
     padding: 0.75rem 1rem !important;
     min-height: 44px !important;
+    /* iOS Safari fixes for smaller screens */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden;
   }
-  
+
   .page-title {
     font-size: 1.25rem !important;
   }
-  
+
   .card {
     padding: 0.75rem;
   }
