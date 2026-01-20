@@ -232,11 +232,21 @@ h4 {
   }
 }
 
-/* Tablet: Collapsed Sidebar (768px - 1023px) */
+/* Tablet: Sidebar with mobile header (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .sidebar {
     width: 240px;
     padding: 1.25rem;
+    padding-top: 1rem;
+    /* Start below mobile header */
+    top: 70px;
+    height: calc(100vh - 70px);
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
   }
 
   .sidebar-logo {
@@ -254,8 +264,12 @@ h4 {
     width: 100%;
     max-width: 280px;
     padding: 1.5rem;
+    padding-top: 1rem;
     transform: translateX(-100%);
     -webkit-overflow-scrolling: touch;
+    /* Start below mobile header */
+    top: 70px;
+    height: calc(100vh - 70px);
   }
 
   .sidebar.open {
@@ -280,9 +294,11 @@ h4 {
   transition: opacity 0.3s ease;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .sidebar-overlay {
     display: block;
+    top: 70px;
+    /* Start below mobile header */
   }
 
   .sidebar-overlay.visible {
