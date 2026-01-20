@@ -1,6 +1,6 @@
 {
-  "name": "MFP Vadamadurai Gym Management",
-  "short_name": "MFP Gym",
+  "name": "MFP GYM VADAMADURAI",
+  "short_name": "MFP GYM",
   "description": "Professional gym management system for members, payments, and staff management",
   "start_url": "/",
   "scope": "/",
@@ -22,7 +22,10 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "productivity"],
+  "categories": [
+    "business",
+    "productivity"
+  ],
   "screenshots": [
     {
       "src": "/MFP logo1.png",

@@ -62,7 +62,7 @@ export function Sidebar() {
                 </button>
                 <div className="mobile-header-brand">
                     <img src="/MFP logo1.png" alt="MFP Gym" />
-                    <span>MFP Gym</span>
+                    <span>VADAMADURAI</span>
                 </div>
             </header>
 
