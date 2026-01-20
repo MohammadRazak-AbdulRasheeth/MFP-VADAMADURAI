@@ -420,12 +420,17 @@ h4 {
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #334155;
   margin-bottom: 1.5rem;
+  flex-shrink: 0;
+  /* Prevent logo from shrinking */
 }
 
 .sidebar-footer {
   padding-top: 1rem;
   border-top: 1px solid #334155;
-  margin-top: 1.5rem;
+  margin-top: auto;
+  /* Push footer to bottom of sidebar */
+  flex-shrink: 0;
+  /* Prevent footer from shrinking */
 }
 
 .sidebar-logo img {
@@ -449,6 +454,10 @@ h4 {
   gap: 0.25rem;
   padding-right: 0.5rem;
   margin-right: -0.5rem;
+  flex: 1;
+  /* Take available space */
+  overflow-y: auto;
+  /* Allow nav items to scroll if many */
 }
 
 /* Custom scrollbar for entire sidebar */
