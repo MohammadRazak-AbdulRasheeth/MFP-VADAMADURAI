@@ -10,6 +10,7 @@ export function MemberForm() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditing = Boolean(id);
+    const isMobile = window.innerWidth <= 640;
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -242,7 +243,7 @@ export function MemberForm() {
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label className="form-label">Date of Joining * (Lifetime)</label>
+                            <label className="form-label">{isMobile ? 'Date of Joining *' : 'Date of Joining * (Lifetime)'}</label>
                             <input
                                 type="date"
                                 name="dateOfJoining"
@@ -278,7 +279,7 @@ export function MemberForm() {
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label className="form-label">Package Start Date * (Current Plan)</label>
+                            <label className="form-label">{isMobile ? 'Start Date *' : 'Package Start Date * (Current Plan)'}</label>
                             <input
                                 type="date"
                                 name="packageStart"
@@ -289,7 +290,7 @@ export function MemberForm() {
                             />
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Package End Date</label>
+                            <label className="form-label">{isMobile ? 'End Date' : 'Package End Date'}</label>
                             <input
                                 type="date"
                                 className="form-input"
@@ -396,7 +397,7 @@ export function MemberForm() {
                         padding: '1rem',
                         marginTop: '1rem',
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(4, 1fr)',
+                        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
                         gap: '1rem'
                     }}>
                         <div>
