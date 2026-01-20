@@ -175,12 +175,14 @@ h4 {
   }
 }
 
-/* Tablet: Reduced Sidebar Space (768px - 1023px) */
+/* Tablet: Use mobile header (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .main-content {
-    margin-left: 240px;
+    margin-left: 0;
     padding: 1.5rem;
-    max-width: calc(100% - 240px);
+    padding-top: 80px !important;
+    /* Space for mobile header */
+    max-width: 100%;
   }
 }
 
@@ -189,6 +191,8 @@ h4 {
   .main-content {
     margin-left: 0;
     padding: 1rem;
+    padding-top: 80px !important;
+    /* Space for mobile header */
     max-width: 100%;
   }
 }
@@ -313,8 +317,18 @@ h4 {
   z-index: 1000;
   align-items: center;
   padding: 0 1rem;
+  /* iOS Safe Area - Account for notch/status bar */
+  padding-top: env(safe-area-inset-top, 0);
   gap: 1rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* When running as standalone PWA, add extra height for status bar */
+@media (display-mode: standalone) {
+  .mobile-header {
+    height: calc(64px + env(safe-area-inset-top, 20px));
+    padding-top: env(safe-area-inset-top, 20px);
+  }
 }
 
 .mobile-header-brand {
@@ -363,7 +377,8 @@ h4 {
   transform: scale(0.95);
 }
 
-@media (max-width: 767px) {
+/* Mobile breakpoint - show header and adjust content */
+@media (max-width: 1024px) {
   .mobile-header {
     display: flex;
   }
@@ -372,8 +387,26 @@ h4 {
     display: flex;
   }
 
+  /* Push main content below the header */
+  .main-content {
+    margin-left: 0;
+    padding-top: 80px;
+  }
+}
+
+/* Smaller mobile screens need same treatment */
+@media (max-width: 767px) {
   .main-content {
     padding-top: 80px;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* PWA Standalone mode - extra space for iOS status bar */
+@media (display-mode: standalone) {
+  .main-content {
+    padding-top: calc(80px + env(safe-area-inset-top, 20px));
   }
 }
 
