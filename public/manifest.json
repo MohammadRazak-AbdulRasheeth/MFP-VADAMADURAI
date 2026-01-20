@@ -1,0 +1,66 @@
+{
+  "name": "MFP Vadamadurai Gym Management",
+  "short_name": "MFP Gym",
+  "description": "Professional gym management system for members, payments, and staff management",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "/MFP logo1.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/MFP logo1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/MFP logo1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/MFP logo1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View gym dashboard",
+      "url": "/?shortcut=dashboard",
+      "icons": [
+        {
+          "src": "/MFP logo1.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Members",
+      "short_name": "Members",
+      "description": "View gym members",
+      "url": "/members?shortcut=members",
+      "icons": [
+        {
+          "src": "/MFP logo1.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
