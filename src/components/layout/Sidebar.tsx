@@ -51,14 +51,20 @@ export function Sidebar() {
 
     return (
         <>
-            {/* Mobile Menu Toggle Button */}
-            <button
-                className="mobile-menu-toggle"
-                onClick={() => setIsOpen(!isOpen)}
-                aria-label={isOpen ? 'Close menu' : 'Open menu'}
-            >
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            {/* Mobile Header Bar */}
+            <header className="mobile-header">
+                <button
+                    className="mobile-menu-toggle"
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-label={isOpen ? 'Close menu' : 'Open menu'}
+                >
+                    {isOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+                <div className="mobile-header-brand">
+                    <img src="/MFP logo1.png" alt="MFP Gym" />
+                    <span>MFP Gym</span>
+                </div>
+            </header>
 
             {/* Overlay for mobile */}
             <div
