@@ -1,5 +1,6 @@
 import express from 'express';
 import Member from '../models/Member.js';
+import Payment from '../models/Payment.js';
 
 const router = express.Router();
 
@@ -21,7 +22,9 @@ router.get('/stats', async (req, res) => {
             pendingDuesResult,
             membersWithDues,
             unverifiedMembersCount,
-            recentAdmissions
+            recentAdmissions,
+            newMembersThisMonth,
+            renewedMembersThisMonth
         ] = await Promise.all([
             Member.countDocuments(),
             Member.countDocuments({ packageEnd: { $gt: today }, isActive: true }), // Improved active check
@@ -44,11 +47,38 @@ router.get('/stats', async (req, res) => {
             Member.countDocuments({ isVerified: false }),
             Member.find({
                 createdAt: { $gte: new Date(today.getTime() - (3 * 24 * 60 * 60 * 1000)) }
-            }).populate('createdBy', 'name role').sort({ createdAt: -1 })
+            }).populate('createdBy', 'name role').sort({ createdAt: -1 }),
+            // New members this month (joined this month)
+            Member.countDocuments({ dateOfJoining: { $gte: startOfMonth } }),
+            // Renewed members this month (unique members with renewal payments this month)
+            Payment.aggregate([
+                {
+                    $match: {
+                        date: { $gte: startOfMonth },
+                        notes: { $regex: /Renewal/i }
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$memberId'
+                    }
+                },
+                {
+                    $count: 'count'
+                }
+            ])
         ]);
 
         const totalCollected = revenueStats[0]?.totalCollected || 0;
         const totalPending = pendingDuesResult[0]?.totalPending || 0;
+        const renewedCount = renewedMembersThisMonth[0]?.count || 0;
+
+        console.log('--- DASHBOARD STATS DEBUG ---');
+        console.log('Start Of Month:', startOfMonth);
+        console.log('New Members Count:', newMembersThisMonth);
+        console.log('Renewed Members Result:', JSON.stringify(renewedMembersThisMonth));
+        console.log('Renewed Count parsed:', renewedCount);
+        console.log('-----------------------------');
 
         res.json({
             totalMembers,
@@ -59,7 +89,9 @@ router.get('/stats', async (req, res) => {
             totalPending,
             membersWithDues,
             unverifiedMembersCount,
-            recentAdmissions
+            recentAdmissions,
+            newMembersThisMonth,
+            renewedMembersThisMonth: renewedCount
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

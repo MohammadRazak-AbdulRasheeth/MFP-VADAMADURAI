@@ -71,6 +71,8 @@ export interface DashboardStats {
   membersWithDues: number;
   recentAdmissions: Member[];
   unverifiedMembersCount?: number;
+  newMembersThisMonth?: number;
+  renewedMembersThisMonth?: number;
 }
 
 // Package prices (default values)

@@ -127,7 +127,7 @@ export function Login() {
                     <div className="card login-card">
                         <div className="login-header">
                             <div className="login-icon">
-                                <img src="/MFP logo1.png" alt="MFP Unisex Gym" />
+                                <img src="/mfp_vadamadurai_nobg_logo.png" alt="MFP Unisex Gym" />
                             </div>
                             <h2>Welcome Back</h2>
                             <p className="text-muted">Sign in to your account</p>

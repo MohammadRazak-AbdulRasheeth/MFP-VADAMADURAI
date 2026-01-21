@@ -61,7 +61,7 @@ export function Sidebar() {
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
                 <div className="mobile-header-brand">
-                    <img src="/MFP logo1.png" alt="MFP Gym" />
+                    <img src="/mfp_vadamadurai_nobg_logo.png" alt="MFP Gym" />
                     <span>VADAMADURAI</span>
                 </div>
             </header>
@@ -75,7 +75,7 @@ export function Sidebar() {
             {/* Sidebar */}
             <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
                 <div className="sidebar-logo">
-                    <img src="/MFP logo1.png" alt="MFP Unisex Gym" style={{ height: '48px', width: 'auto' }} />
+                    <img src="/mfp_vadamadurai_nobg_logo.png" alt="MFP Unisex Gym" style={{ height: '70px', width: 'auto' }} />
                 </div>
 
                 <nav className="sidebar-nav">

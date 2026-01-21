@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, TrendingUp, AlertTriangle, XCircle, Bell, Plus, IndianRupee, AlertCircle, RefreshCw } from 'lucide-react';
+import { Users, TrendingUp, AlertTriangle, XCircle, Bell, Plus, IndianRupee, AlertCircle, RefreshCw, UserPlus, RotateCcw, Calendar } from 'lucide-react';
 import { StatCard, Card } from '../components/ui/Card';
 import { LinkButton } from '../components/ui/Button';
 import { getStatusBadge } from '../components/ui/Badge';
@@ -32,6 +32,8 @@ export function Dashboard() {
         membersWithDues: 0,
         unverifiedMembersCount: 0,
         recentAdmissions: [],
+        newMembersThisMonth: 0,
+        renewedMembersThisMonth: 0,
     });
     const [expiringMembers, setExpiringMembers] = useState<Member[]>([]);
     const [unverifiedMembers, setUnverifiedMembers] = useState<Member[]>([]);
@@ -229,6 +231,37 @@ export function Dashboard() {
                     {isAdmin && (
                         <div style={{ overflowX: 'hidden' }}>
                             <AnalyticsCharts data={analyticsData} loading={analyticsLoading} />
+                        </div>
+                    )}
+
+                    {/* Monthly Statistics - Admin Only */}
+                    {isAdmin && (
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h3 style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                marginBottom: '1rem',
+                                color: 'var(--text-primary)',
+                                fontSize: '1.1rem'
+                            }}>
+                                <Calendar size={20} />
+                                This Month's Activity
+                            </h3>
+                            <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+                                <StatCard
+                                    label="New Members This Month"
+                                    value={stats.newMembersThisMonth || 0}
+                                    icon={UserPlus}
+                                    variant="primary"
+                                />
+                                <StatCard
+                                    label="Renewed This Month"
+                                    value={stats.renewedMembersThisMonth || 0}
+                                    icon={RotateCcw}
+                                    variant="success"
+                                />
+                            </div>
                         </div>
                     )}
 

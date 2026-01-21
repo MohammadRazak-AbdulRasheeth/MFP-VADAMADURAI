@@ -136,8 +136,8 @@
 /* Logo - Mobile First (Visible) */
 #root .login-icon {
     display: flex;
-    width: 70px;
-    height: 70px;
+    width: 100px;
+    height: 100px;
     margin: 0 auto 1.5rem;
     align-items: center;
     justify-content: center;
