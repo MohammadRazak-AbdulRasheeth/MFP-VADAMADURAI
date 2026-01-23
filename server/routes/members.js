@@ -1,6 +1,7 @@
 import express from 'express';
 import Member from '../models/Member.js';
 import Payment from '../models/Payment.js';
+import { sendWelcomeEmail } from '../services/email.js';
 
 const router = express.Router();
 
@@ -100,14 +101,24 @@ router.post('/', async (req, res) => {
         }
 
         // Send welcome email (non-blocking)
+        // Send welcome email (non-blocking)
+        console.log(`[DEBUG] Member created. Email: ${savedMember.email}`);
         if (savedMember.email) {
-            import('../services/email.js')
-                .then(({ sendWelcomeEmail }) => {
-                    sendWelcomeEmail(savedMember).catch(err =>
-                        console.error('Failed to send welcome email:', err)
-                    );
+            console.log(`[DEBUG] Attempting to send welcome email to ${savedMember.email}`);
+            // Use static import function directly
+            sendWelcomeEmail(savedMember)
+                .then(result => {
+                    if (result && result.success) {
+                        console.log(`[DEBUG] Welcome email successfully sent to ${savedMember.email}`);
+                    } else {
+                        console.error(`[DEBUG] Failed to send welcome email (service returned failure):`, result);
+                    }
                 })
-                .catch(err => console.error('Failed to load email service:', err));
+                .catch(err => {
+                    console.error('[DEBUG] CRITICAL ERROR sending welcome email:', err);
+                });
+        } else {
+            console.warn('[DEBUG] No email address provided for new member. Skipping welcome email.');
         }
 
         res.status(201).json(savedMember);
