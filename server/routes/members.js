@@ -99,6 +99,17 @@ router.post('/', async (req, res) => {
             await payment.save();
         }
 
+        // Send welcome email (non-blocking)
+        if (savedMember.email) {
+            import('../services/email.js')
+                .then(({ sendWelcomeEmail }) => {
+                    sendWelcomeEmail(savedMember).catch(err =>
+                        console.error('Failed to send welcome email:', err)
+                    );
+                })
+                .catch(err => console.error('Failed to load email service:', err));
+        }
+
         res.status(201).json(savedMember);
     } catch (error) {
         res.status(400).json({ message: error.message });

@@ -22,6 +22,7 @@ export function MemberForm() {
         packageType: 'A' as PackageType,
         packagePrice: PACKAGE_PRICES['A'],
         packageStart: new Date().toISOString().split('T')[0],
+        additionalMonths: '0',
         amountPaid: '',
         trainerId: '',
         discountType: 'NONE' as 'NONE' | 'FIXED' | 'CUSTOM',
@@ -49,6 +50,7 @@ export function MemberForm() {
                         packageType: member.packageType,
                         packagePrice: member.packagePrice,
                         packageStart: member.packageStart.split('T')[0],
+                        additionalMonths: ((member as any).additionalMonths || 0).toString(),
                         amountPaid: member.amountPaid.toString(),
                         trainerId: member.trainerId || '',
                         discountType: (member as any).discountType || 'NONE',
@@ -89,8 +91,9 @@ export function MemberForm() {
     const calculateEndDate = () => {
         const start = new Date(formData.packageStart);
         const months = PACKAGE_MONTHS[formData.packageType];
+        const additional = parseInt(formData.additionalMonths) || 0;
         const end = new Date(start);
-        end.setMonth(end.getMonth() + months);
+        end.setMonth(end.getMonth() + months + additional);
         return end.toISOString().split('T')[0];
     };
 
@@ -119,6 +122,7 @@ export function MemberForm() {
                 packagePrice: packagePrice,
                 packageStart: formData.packageStart,
                 packageEnd: calculateEndDate(),
+                additionalMonths: parseInt(formData.additionalMonths) || 0,
                 amountPaid: amountPaid,
                 trainerId: formData.trainerId || undefined,
                 discountType: formData.discountType,
@@ -264,17 +268,34 @@ export function MemberForm() {
                         </div>
                         <div className="form-group">
                             <label className="form-label">Package Type *</label>
-                            <select
-                                name="packageType"
-                                className="form-select"
-                                value={formData.packageType}
-                                onChange={handleChange}
-                                required
-                            >
-                                {Object.entries(PACKAGE_LABELS).map(([value, label]) => (
-                                    <option key={value} value={value}>{label} - ₹{PACKAGE_PRICES[value as PackageType].toLocaleString()}</option>
-                                ))}
-                            </select>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <select
+                                    name="packageType"
+                                    className="form-select"
+                                    value={formData.packageType}
+                                    onChange={handleChange}
+                                    required
+                                    style={{ flex: 2 }}
+                                >
+                                    {Object.entries(PACKAGE_LABELS).map(([value, label]) => (
+                                        <option key={value} value={value}>{label} - ₹{PACKAGE_PRICES[value as PackageType].toLocaleString()}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    name="additionalMonths"
+                                    className="form-select"
+                                    value={formData.additionalMonths}
+                                    onChange={(e) => {
+                                        handleChange(e);
+                                    }}
+                                    style={{ flex: 1 }}
+                                    title="Additional Months (Free/Bonus)"
+                                >
+                                    {[...Array(13)].map((_, i) => (
+                                        <option key={i} value={i}>+{i} Month{i !== 1 ? 's' : ''}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
 

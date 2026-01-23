@@ -1,27 +1,47 @@
-const nodemailer = require('nodemailer');
+import sgMail from '@sendgrid/mail';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Create reusable transporter
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 587,
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+// Set API Key
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+} else {
+  console.warn('⚠️ SENDGRID_API_KEY is missing in .env');
+}
+
+const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'noreply@mfpvadamadurai.com';
+
+// Helper to send email
+const sendEmail = async (to, subject, html) => {
+  const msg = {
+    to,
+    from: FROM_EMAIL,
+    subject,
+    html,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log(`✉️ Email sent to ${to}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`❌ Failed to send email to ${to}:`, error.message);
+    if (error.response) {
+      console.error(error.response.body);
     }
-  });
+    return { success: false, error: error.message };
+  }
 };
 
 // Send expiry reminder email
-const sendExpiryReminder = async (member, daysLeft) => {
-  const transporter = createTransporter();
-
-  const mailOptions = {
-    from: `"GymPro" <${process.env.SMTP_USER}>`,
-    to: member.email,
-    subject: `⏰ Gym Membership Expiring in ${daysLeft} Days`,
-    html: `
+export const sendExpiryReminder = async (member, daysLeft) => {
+  const subject = `⏰ Gym Membership Expiring in ${daysLeft} Days`;
+  const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #6366f1, #4f46e5); padding: 20px; text-align: center;">
           <h1 style="color: white; margin: 0;">🏋️ GymPro</h1>
@@ -45,23 +65,13 @@ const sendExpiryReminder = async (member, daysLeft) => {
           <p>GymPro Management System</p>
         </div>
       </div>
-    `
-  };
+    `;
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✉️ Reminder sent to ${member.email}`);
-    return { success: true };
-  } catch (error) {
-    console.error(`Failed to send email to ${member.email}:`, error.message);
-    return { success: false, error: error.message };
-  }
+  return sendEmail(member.email, subject, html);
 };
 
 // Send notification to gym owner
-const sendOwnerNotification = async (expiringMembers) => {
-  const transporter = createTransporter();
-
+export const sendOwnerNotification = async (expiringMembers) => {
   const memberList = expiringMembers.map(m =>
     `<tr>
       <td style="padding: 8px; border-bottom: 1px solid #eee;">${m.fullName}</td>
@@ -70,11 +80,8 @@ const sendOwnerNotification = async (expiringMembers) => {
     </tr>`
   ).join('');
 
-  const mailOptions = {
-    from: `"GymPro System" <${process.env.SMTP_USER}>`,
-    to: process.env.OWNER_EMAIL || process.env.SMTP_USER,
-    subject: `📊 Daily Report: ${expiringMembers.length} Members Expiring Soon`,
-    html: `
+  const subject = `📊 Daily Report: ${expiringMembers.length} Members Expiring Soon`;
+  const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px;">
         <h2>🏋️ Daily Expiry Report</h2>
         <p>The following members have memberships expiring within 7 days:</p>
@@ -96,28 +103,15 @@ const sendOwnerNotification = async (expiringMembers) => {
           This is an automated report from GymPro Management System.
         </p>
       </div>
-    `
-  };
+    `;
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log('📊 Owner notification sent');
-    return { success: true };
-  } catch (error) {
-    console.error('Failed to send owner notification:', error.message);
-    return { success: false, error: error.message };
-  }
+  return sendEmail(process.env.OWNER_EMAIL || process.env.SENDGRID_FROM_EMAIL, subject, html);
 };
 
 // Send Payment Due notification
-const sendPaymentReminder = async (member) => {
-  const transporter = createTransporter();
-
-  const mailOptions = {
-    from: `"GymPro" <${process.env.SMTP_USER}>`,
-    to: member.email,
-    subject: `🔔 Gym Membership Payment Due`,
-    html: `
+export const sendPaymentReminder = async (member) => {
+  const subject = `🔔 Gym Membership Payment Due`;
+  const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #f43f5e, #e11d48); padding: 20px; text-align: center;">
           <h1 style="color: white; margin: 0;">🏋️ GymPro</h1>
@@ -137,21 +131,48 @@ const sendPaymentReminder = async (member) => {
           <p>GymPro Management System</p>
         </div>
       </div>
-    `
-  };
+    `;
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✉️ Payment reminder sent to ${member.email}`);
-    return { success: true };
-  } catch (error) {
-    console.error(`Failed to send payment reminder to ${member.email}:`, error.message);
-    return { success: false, error: error.message };
-  }
+  return sendEmail(member.email, subject, html);
 };
 
-module.exports = {
-  sendExpiryReminder,
-  sendOwnerNotification,
-  sendPaymentReminder
+// Send Welcome Email to New Member
+export const sendWelcomeEmail = async (member) => {
+  const subject = `🎉 Welcome to GymPro, ${member.fullName}!`;
+  const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 20px; text-align: center;">
+          <h1 style="color: white; margin: 0;">🏋️ GymPro</h1>
+        </div>
+        <div style="padding: 30px; background: #f8fafc;">
+          <h2>Welcome to the Family, ${member.fullName}! 🚀</h2>
+          <p>We are thrilled to have you on board. Get ready to embark on a journey of fitness, health, and transformation.</p>
+          
+          <div style="background: white; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #22c55e;">
+            <h3 style="margin-top: 0;">Your Membership Details</h3>
+            <p><strong>Plan:</strong> ${member.packageType.replace('_', ' ')}</p>
+            <p><strong>Start Date:</strong> ${new Date(member.packageStart).toLocaleDateString()}</p>
+            <p><strong>Expiry Date:</strong> ${new Date(member.packageEnd).toLocaleDateString()}</p>
+          </div>
+          
+          <h3>Here's what you can look forward to:</h3>
+          <ul>
+            <li>✅ State-of-the-art equipment</li>
+            <li>✅ Expert trainers and guidance</li>
+            <li>✅ A supportive community</li>
+          </ul>
+
+          <p>If you have any questions, feel free to ask our staff at the reception.</p>
+          
+          <p style="margin-top: 30px;">Let's crush those goals! 💪</p>
+          
+        </div>
+        <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
+          <p>GymPro Management System</p>
+          <p>Vadamadurai</p>
+        </div>
+      </div>
+    `;
+
+  return sendEmail(member.email, subject, html);
 };

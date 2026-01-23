@@ -39,6 +39,10 @@ const memberSchema = new mongoose.Schema({
         required: true,
         default: 0
     },
+    additionalMonths: {
+        type: Number,
+        default: 0
+    },
     discountType: {
         type: String,
         enum: ['NONE', 'FIXED', 'CUSTOM'],
