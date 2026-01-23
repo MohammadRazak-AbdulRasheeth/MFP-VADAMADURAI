@@ -176,3 +176,36 @@ export const sendWelcomeEmail = async (member) => {
 
   return sendEmail(member.email, subject, html);
 };
+
+// Send Expiry Notification (Expired Yesterday)
+export const sendExpiredNotification = async (member) => {
+  const subject = `⚠️ Your Gym Membership Has Expired`;
+  const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 20px; text-align: center;">
+          <h1 style="color: white; margin: 0;">🏋️ GymPro</h1>
+        </div>
+        <div style="padding: 30px; background: #f8fafc;">
+          <h2>Hi ${member.fullName},</h2>
+          <p>We hope you've been enjoying your workouts! <strong>Your gym membership expired yesterday (${new Date(member.packageEnd).toLocaleDateString()}).</strong></p>
+          
+          <div style="background: white; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #ef4444;">
+            <p><strong>Package:</strong> ${member.packageType.replace('_', ' ')}</p>
+            <p><strong>Expired On:</strong> ${new Date(member.packageEnd).toLocaleDateString()}</p>
+          </div>
+          
+          <p>To avoid interrupting your fitness routine, please visit the gym to renew your membership as soon as possible.</p>
+          <p>Consistency is key to results! 💪</p>
+          
+          <a href="#" style="display: inline-block; background: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px;">
+            Renew Membership
+          </a>
+        </div>
+        <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
+          <p>GymPro Management System</p>
+        </div>
+      </div>
+    `;
+
+  return sendEmail(member.email, subject, html);
+};
