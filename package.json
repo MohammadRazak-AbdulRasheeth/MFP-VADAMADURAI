@@ -12,7 +12,6 @@
     "dev:full": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
-    "@sendgrid/mail": "^8.1.6",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -24,7 +23,9 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.12.0",
-    "recharts": "^3.6.0"
+    "recharts": "^3.6.0",
+    "resend": "^6.9.1",
+    "twilio": "^5.12.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

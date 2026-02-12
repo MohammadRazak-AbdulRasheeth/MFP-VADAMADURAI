@@ -13,49 +13,79 @@ router.get('/stats', async (req, res) => {
 
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
+        const start = Date.now();
+        console.log('📊 Fetching dashboard stats...');
+
         const [
-            totalMembers,
-            activeMembers,
-            expiringThisWeek,
-            expiredMembers,
-            revenueStats,
-            pendingDuesResult,
-            membersWithDues,
-            unverifiedMembersCount,
+            statsResult,
             recentAdmissions,
-            newMembersThisMonth,
             renewedMembersThisMonth
         ] = await Promise.all([
-            Member.countDocuments(),
-            Member.countDocuments({ packageEnd: { $gt: today }, isActive: true }), // Improved active check
-            Member.countDocuments({ packageEnd: { $gt: today, $lte: weekLater } }),
-            Member.countDocuments({ packageEnd: { $lte: today } }),
+            // 1. Main Aggregation for all counts and sums
             Member.aggregate([
                 {
-                    $group: {
-                        _id: null,
-                        totalCollected: { $sum: '$amountPaid' },
-                        totalPackageValue: { $sum: '$packagePrice' }
+                    $facet: {
+                        "totalMembers": [{ $count: "count" }],
+                        "activeMembers": [
+                            { $match: { packageEnd: { $gt: today }, isActive: true } },
+                            { $count: "count" }
+                        ],
+                        "expiringThisWeek": [
+                            { $match: { packageEnd: { $gt: today, $lte: weekLater } } },
+                            { $count: "count" }
+                        ],
+                        "expiredMembers": [
+                            { $match: { packageEnd: { $lte: today } } },
+                            { $count: "count" }
+                        ],
+                        "revenueStats": [
+                            {
+                                $group: {
+                                    _id: null,
+                                    totalCollected: { $sum: '$amountPaid' },
+                                    totalPackageValue: { $sum: '$packagePrice' }
+                                }
+                            }
+                        ],
+                        "pendingDues": [
+                            { $match: { balanceDue: { $gt: 0 } } },
+                            {
+                                $group: {
+                                    _id: null,
+                                    totalPending: { $sum: '$balanceDue' }
+                                }
+                            }
+                        ],
+                        "membersWithDues": [
+                            { $match: { balanceDue: { $gt: 0 } } },
+                            { $count: "count" }
+                        ],
+                        "unverifiedMembersCount": [
+                            { $match: { isVerified: false } },
+                            { $count: "count" }
+                        ],
+                        "newMembersThisMonth": [
+                            { $match: { dateOfJoining: { $gte: startOfMonth } } },
+                            { $count: "count" }
+                        ]
                     }
                 }
             ]),
-            Member.aggregate([
-                { $match: { balanceDue: { $gt: 0 } } },
-                { $group: { _id: null, totalPending: { $sum: '$balanceDue' } } }
-            ]),
-            Member.countDocuments({ balanceDue: { $gt: 0 } }),
-            Member.countDocuments({ isVerified: false }),
+
+            // 2. Recent Admissions (Needs populate, better separately or complicated $lookup)
             Member.find({
                 createdAt: { $gte: new Date(today.getTime() - (3 * 24 * 60 * 60 * 1000)) }
             }).populate('createdBy', 'name role').sort({ createdAt: -1 }),
-            // New members this month (joined this month)
-            Member.countDocuments({ dateOfJoining: { $gte: startOfMonth } }),
-            // Renewed members this month (unique members with renewal payments this month)
+
+            // 3. Renewed Members (Join with Payment model, better separate)
             Payment.aggregate([
                 {
                     $match: {
                         date: { $gte: startOfMonth },
-                        notes: { $regex: /Renewal/i }
+                        $or: [
+                            { category: 'RENEWAL' },
+                            { notes: { $regex: /Renewal/i } }
+                        ]
                     }
                 },
                 {
@@ -69,16 +99,22 @@ router.get('/stats', async (req, res) => {
             ])
         ]);
 
-        const totalCollected = revenueStats[0]?.totalCollected || 0;
-        const totalPending = pendingDuesResult[0]?.totalPending || 0;
-        const renewedCount = renewedMembersThisMonth[0]?.count || 0;
+        const duration = Date.now() - start;
+        console.log(`⏱️ Dashboard Stats DB Queries took: ${duration}ms`);
 
-        console.log('--- DASHBOARD STATS DEBUG ---');
-        console.log('Start Of Month:', startOfMonth);
-        console.log('New Members Count:', newMembersThisMonth);
-        console.log('Renewed Members Result:', JSON.stringify(renewedMembersThisMonth));
-        console.log('Renewed Count parsed:', renewedCount);
-        console.log('-----------------------------');
+        const stats = statsResult[0];
+
+        // Safe unpacking of facet results (they return arrays)
+        const totalMembers = stats.totalMembers[0]?.count || 0;
+        const activeMembers = stats.activeMembers[0]?.count || 0;
+        const expiringThisWeek = stats.expiringThisWeek[0]?.count || 0;
+        const expiredMembers = stats.expiredMembers[0]?.count || 0;
+        const totalCollected = stats.revenueStats[0]?.totalCollected || 0;
+        const totalPending = stats.pendingDues[0]?.totalPending || 0;
+        const membersWithDues = stats.membersWithDues[0]?.count || 0;
+        const unverifiedMembersCount = stats.unverifiedMembersCount[0]?.count || 0;
+        const newMembersThisMonth = stats.newMembersThisMonth[0]?.count || 0;
+        const renewedCount = renewedMembersThisMonth[0]?.count || 0;
 
         res.json({
             totalMembers,

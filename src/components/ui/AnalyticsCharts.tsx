@@ -42,7 +42,7 @@ export function AnalyticsCharts({ data, loading }: AnalyticsChartsProps) {
         <div className="analytics-section" style={{ marginBottom: '2rem' }}>
             <h2 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)' }}>📊 Analytics Overview</h2>
 
-            <div className="analytics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
+            <div className="analytics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', gap: '1.5rem' }}>
                 {/* Package Distribution Chart */}
                 <div className="card" style={{ padding: '1.5rem' }}>
                     <h3 style={{ marginBottom: '1rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>📦 Package Distribution</h3>

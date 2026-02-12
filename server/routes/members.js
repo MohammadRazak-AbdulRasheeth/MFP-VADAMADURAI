@@ -2,6 +2,7 @@ import express from 'express';
 import Member from '../models/Member.js';
 import Payment from '../models/Payment.js';
 import { sendWelcomeEmail } from '../services/email.js';
+import { sendWelcomeWhatsApp } from '../services/whatsapp.js';
 
 const router = express.Router();
 
@@ -95,7 +96,9 @@ router.post('/', async (req, res) => {
                 amount: savedMember.amountPaid,
                 date: new Date(),
                 method: req.body.paymentMethod || 'CASH',
-                notes: `Initial payment for ${savedMember.packageType.replace('_', ' ')} package`
+                method: req.body.paymentMethod || 'CASH',
+                notes: `Initial payment for ${savedMember.packageType.replace('_', ' ')} package`,
+                category: 'ADMISSION'
             });
             await payment.save();
         }
@@ -119,6 +122,10 @@ router.post('/', async (req, res) => {
                 });
         } else {
             console.warn('[DEBUG] No email address provided for new member. Skipping welcome email.');
+        }
+
+        if (savedMember.phone) {
+            sendWelcomeWhatsApp(savedMember).catch(err => console.error('WhatsApp Error:', err));
         }
 
         res.status(201).json(savedMember);
@@ -174,7 +181,9 @@ router.put('/:id', async (req, res) => {
                 amount: paymentDiff,
                 date: new Date(),
                 method: 'CASH',
-                notes: `Additional payment`
+                method: 'CASH',
+                notes: `Additional payment`,
+                category: 'GENERAL'
             });
             await payment.save();
         }
@@ -232,17 +241,16 @@ router.post('/:id/renew', async (req, res) => {
 
         await member.save();
 
-        // Create payment record for renewal
-        if (amountPaid > 0) {
-            const payment = new Payment({
-                memberId: member._id,
-                amount: amountPaid,
-                date: new Date(),
-                method: 'CASH',
-                notes: `Renewal payment for ${packageType.replace('_', ' ')} package`
-            });
-            await payment.save();
-        }
+        // Create payment record for renewal (Always create to track the event)
+        const payment = new Payment({
+            memberId: member._id,
+            amount: amountPaid || 0,
+            date: new Date(),
+            method: 'CASH',
+            notes: `Renewal payment for ${packageType.replace('_', ' ')} package`,
+            category: 'RENEWAL'
+        });
+        await payment.save();
 
         res.json(member);
     } catch (error) {

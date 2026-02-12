@@ -120,4 +120,12 @@ export const paymentService = {
     },
 };
 
+// Reports
+export const reportsService = {
+    getMonthlyGrowth: async () => {
+        const { data } = await api.get('/reports/monthly_growth');
+        return data;
+    },
+};
+
 export default api;

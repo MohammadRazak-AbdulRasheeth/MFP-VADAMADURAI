@@ -1,324 +1,222 @@
+
 import { useState, useEffect } from 'react';
-import { FileText, Download, RefreshCw, Users, IndianRupee, AlertTriangle, Calendar } from 'lucide-react';
-import { Card, StatCard } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { dashboardService, memberService, paymentService } from '../services/api';
-import type { DashboardStats, Member, Payment } from '../types';
-import { PACKAGE_LABELS } from '../types';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Download, Calendar, RefreshCw } from 'lucide-react';
+import { Card } from '../components/ui/Card';
+import { reportsService } from '../services/api';
 
 export function Reports() {
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [members, setMembers] = useState<Member[]>([]);
-    const [payments, setPayments] = useState<Payment[]>([]);
+    const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [reportType, setReportType] = useState<'summary' | 'members' | 'payments' | 'dues'>('summary');
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-    const fetchData = async () => {
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const fetchReports = async () => {
         try {
             setLoading(true);
-            const [statsData, membersData, paymentsData] = await Promise.all([
-                dashboardService.getStats(),
-                memberService.getAll(),
-                paymentService.getAll()
-            ]);
-            setStats(statsData);
-            setMembers(membersData);
-            setPayments(paymentsData);
-        } catch (err) {
-            console.error('Error fetching reports:', err);
+            const reportData = await reportsService.getMonthlyGrowth();
+            // Format months for display (e.g., "2025-01" -> "Jan 2025")
+            const formattedData = reportData.map((item: any) => {
+                const [year, month] = item.month.split('-');
+                const date = new Date(parseInt(year), parseInt(month) - 1);
+                return {
+                    ...item,
+                    displayMonth: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                };
+            });
+            setData(formattedData);
+        } catch (error) {
+            console.error('Error fetching reports:', error);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchData();
+        fetchReports();
     }, []);
 
-    const exportToCSV = (data: any[], filename: string) => {
-        if (data.length === 0) {
-            alert('No data to export');
-            return;
+    const exportToCSV = () => {
+        if (!data.length) return;
+
+        const headers = ['Month', 'New Members', 'Renewals'];
+        const csvContent = [
+            headers.join(','),
+            ...data.map(row => `${row.month},${row.newMembers},${row.renewals}`)
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'monthly_growth_report.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
-        const headers = Object.keys(data[0]).join(',');
-        const rows = data.map(row => Object.values(row).join(','));
-        const csv = [headers, ...rows].join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
     };
 
-    const exportMembers = () => {
-        const data = members.map(m => ({
-            Name: m.fullName,
-            Phone: m.phone,
-            Email: m.email || '',
-            Package: PACKAGE_LABELS[m.packageType],
-            PackagePrice: m.packagePrice,
-            AmountPaid: m.amountPaid,
-            BalanceDue: m.balanceDue,
-            Status: m.paymentStatus,
-            JoinDate: new Date(m.dateOfJoining).toLocaleDateString(),
-            ExpiryDate: new Date(m.packageEnd).toLocaleDateString(),
-        }));
-        exportToCSV(data, 'members_report');
-    };
+    const ReportMobileCard = ({ row }: { row: any }) => (
+        <div style={{
+            padding: '1.25rem',
+            borderBottom: '1px solid var(--border)',
+            background: 'var(--bg-card)',
+            marginBottom: '1rem',
+            borderRadius: 'var(--radius-sm)',
+            boxShadow: 'var(--shadow-sm)'
+        }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <span style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--primary)' }}>{row.displayMonth}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Activity</span>
+                    <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{row.newMembers + row.renewals}</span>
+                </div>
+            </div>
 
-    const exportPayments = () => {
-        const data = payments.map(p => {
-            const member = members.find(m => m._id === p.memberId);
-            return {
-                Member: member?.fullName || 'Unknown',
-                Amount: p.amount,
-                Date: new Date(p.date).toLocaleDateString(),
-                Method: p.method,
-                Notes: p.notes || '',
-            };
-        });
-        exportToCSV(data, 'payments_report');
-    };
-
-    const exportDues = () => {
-        const dueMembers = members.filter(m => (m.balanceDue || 0) > 0);
-        const data = dueMembers.map(m => ({
-            Name: m.fullName,
-            Phone: m.phone,
-            Package: PACKAGE_LABELS[m.packageType],
-            PackagePrice: m.packagePrice,
-            AmountPaid: m.amountPaid,
-            BalanceDue: m.balanceDue,
-        }));
-        exportToCSV(data, 'pending_dues_report');
-    };
-
-    const membersWithDues = members.filter(m => (m.balanceDue || 0) > 0);
-    const totalDues = membersWithDues.reduce((sum, m) => sum + (m.balanceDue || 0), 0);
-    const totalCollected = payments.reduce((sum, p) => sum + p.amount, 0);
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ background: 'rgba(212, 175, 55, 0.05)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(212, 175, 55, 0.1)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>New Joinings</div>
+                    <span className="badge badge-primary" style={{ fontSize: '1rem', padding: '0.25rem 0.75rem' }}>{row.newMembers}</span>
+                </div>
+                <div style={{ background: 'rgba(40, 167, 69, 0.05)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(40, 167, 69, 0.1)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Renewals</div>
+                    <span className="badge badge-success" style={{ fontSize: '1rem', padding: '0.25rem 0.75rem' }}>{row.renewals}</span>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="animate-in">
-            <div className="page-header">
+            <div className="page-header" style={{
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: isMobile ? 'flex-start' : 'center'
+            }}>
                 <h1 className="page-title">
-                    <FileText style={{ display: 'inline', marginRight: '0.5rem', verticalAlign: 'middle' }} size={28} />
-                    Reports
+                    <Calendar className="mr-2" /> Monthly Reports
                 </h1>
-                <Button variant="secondary" onClick={fetchData}>
-                    <RefreshCw size={18} />
-                    Refresh
-                </Button>
+                <div style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    width: isMobile ? '100%' : 'auto'
+                }}>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={fetchReports}
+                        style={{ flex: isMobile ? '0 0 auto' : 'initial' }}
+                    >
+                        <RefreshCw size={18} />
+                    </button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={exportToCSV}
+                        disabled={!data.length}
+                        style={{ flex: isMobile ? 1 : 'initial' }}
+                    >
+                        <Download size={18} style={{ marginRight: '0.5rem' }} /> Export CSV
+                    </button>
+                </div>
             </div>
 
             {loading ? (
-                <Card>
-                    <div className="empty-state">
-                        <RefreshCw size={32} />
-                        <p>Loading reports...</p>
-                    </div>
-                </Card>
+                <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+                    <RefreshCw size={32} className="animate-spin" />
+                    <p>Loading reports...</p>
+                </div>
             ) : (
-                <>
-                    {/* Report Type Tabs */}
-                    <div className="filter-group" style={{ marginBottom: '1.5rem' }}>
-                        {[
-                            { key: 'summary', label: '📊 Summary' },
-                            { key: 'members', label: '👥 Members' },
-                            { key: 'payments', label: '💳 Payments' },
-                            { key: 'dues', label: '⚠️ Pending Dues' },
-                        ].map(tab => (
-                            <button
-                                key={tab.key}
-                                className={`filter-btn ${reportType === tab.key ? 'active' : ''}`}
-                                onClick={() => setReportType(tab.key as any)}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
+                <div className="content-grid" style={{ gridTemplateColumns: '1fr' }}>
 
-                    {/* Summary Report */}
-                    {reportType === 'summary' && stats && (
-                        <>
-                            <div className="stats-grid">
-                                <StatCard
-                                    label="Total Members"
-                                    value={stats.totalMembers}
-                                    icon={Users}
-                                    variant="primary"
-                                />
-                                <StatCard
-                                    label="Active Members"
-                                    value={stats.activeMembers}
-                                    icon={Users}
-                                    variant="success"
-                                />
-                                <StatCard
-                                    label="Total Collected"
-                                    value={`₹${totalCollected.toLocaleString()}`}
-                                    icon={IndianRupee}
-                                    variant="success"
-                                />
-                                <StatCard
-                                    label="Pending Dues"
-                                    value={`₹${totalDues.toLocaleString()}`}
-                                    icon={AlertTriangle}
-                                    variant="warning"
-                                />
-                            </div>
-                            <Card className="mt-4">
-                                <h4>Quick Stats</h4>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginTop: '1rem' }}>
-                                    <div style={{ padding: '1rem', background: 'var(--bg-card-hover)', borderRadius: '8px' }}>
-                                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Expiring This Week</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>{stats.expiringThisWeek}</div>
-                                    </div>
-                                    <div style={{ padding: '1rem', background: 'var(--bg-card-hover)', borderRadius: '8px' }}>
-                                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Expired Members</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>{stats.expiredMembers}</div>
-                                    </div>
-                                    <div style={{ padding: '1rem', background: 'var(--bg-card-hover)', borderRadius: '8px' }}>
-                                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Members with Dues</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>{membersWithDues.length}</div>
-                                    </div>
-                                    <div style={{ padding: '1rem', background: 'var(--bg-card-hover)', borderRadius: '8px' }}>
-                                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>Total Transactions</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>{payments.length}</div>
-                                    </div>
-                                </div>
-                            </Card>
-                        </>
-                    )}
-
-                    {/* Members Report */}
-                    {reportType === 'members' && (
-                        <Card>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h4>All Members ({members.length})</h4>
-                                <Button onClick={exportMembers}>
-                                    <Download size={18} />
-                                    Export CSV
-                                </Button>
-                            </div>
-                            <div className="table-container">
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Phone</th>
-                                            <th>Package</th>
-                                            <th>Paid</th>
-                                            <th>Due</th>
-                                            <th>Expiry</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {members.map(m => (
-                                            <tr key={m._id}>
-                                                <td>{m.fullName}</td>
-                                                <td>{m.phone}</td>
-                                                <td>{PACKAGE_LABELS[m.packageType]}</td>
-                                                <td className="text-success">₹{(m.amountPaid || 0).toLocaleString()}</td>
-                                                <td className={(m.balanceDue || 0) > 0 ? 'text-danger' : 'text-success'}>
-                                                    ₹{(m.balanceDue || 0).toLocaleString()}
-                                                </td>
-                                                <td>{new Date(m.packageEnd).toLocaleDateString()}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </Card>
-                    )}
-
-                    {/* Payments Report */}
-                    {reportType === 'payments' && (
-                        <Card>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h4>All Payments ({payments.length})</h4>
-                                <Button onClick={exportPayments}>
-                                    <Download size={18} />
-                                    Export CSV
-                                </Button>
-                            </div>
-                            <div className="table-container">
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Member</th>
-                                            <th>Amount</th>
-                                            <th>Date</th>
-                                            <th>Method</th>
-                                            <th>Notes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {payments.map(p => {
-                                            const member = members.find(m => m._id === p.memberId);
-                                            return (
-                                                <tr key={p._id}>
-                                                    <td>{member?.fullName || 'Unknown'}</td>
-                                                    <td className="text-success">₹{p.amount.toLocaleString()}</td>
-                                                    <td>{new Date(p.date).toLocaleDateString()}</td>
-                                                    <td>{p.method}</td>
-                                                    <td className="text-muted">{p.notes || '-'}</td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </Card>
-                    )}
-
-                    {/* Pending Dues Report */}
-                    {reportType === 'dues' && (
-                        <Card>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h4>Members with Pending Dues ({membersWithDues.length})</h4>
-                                <Button onClick={exportDues}>
-                                    <Download size={18} />
-                                    Export CSV
-                                </Button>
-                            </div>
-                            {membersWithDues.length === 0 ? (
-                                <div className="empty-state">
-                                    <IndianRupee size={48} />
-                                    <h3>No Pending Dues</h3>
-                                    <p className="text-muted">All members have paid their full amount!</p>
-                                </div>
+                    {/* Chart Section */}
+                    <Card title="Growth Trends: New vs Renewals">
+                        <div style={{ width: '100%', height: isMobile ? 300 : 400 }}>
+                            {data.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart
+                                        data={data}
+                                        margin={{
+                                            top: 20,
+                                            right: 30,
+                                            left: 20,
+                                            bottom: 5,
+                                        }}
+                                    >
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#444" vertical={false} />
+                                        <XAxis dataKey="displayMonth" stroke="#888" />
+                                        <YAxis stroke="#888" />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}
+                                            itemStyle={{ color: '#fff' }}
+                                        />
+                                        <Legend />
+                                        <Bar dataKey="newMembers" name="New Joinings" fill="#d4af37" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="renewals" name="Renewals" fill="#28a745" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
                             ) : (
-                                <div className="table-container">
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Phone</th>
-                                                <th>Package Price</th>
-                                                <th>Paid</th>
-                                                <th>Balance Due</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {membersWithDues.map(m => (
-                                                <tr key={m._id}>
-                                                    <td>{m.fullName}</td>
-                                                    <td>{m.phone}</td>
-                                                    <td>₹{(m.packagePrice || 0).toLocaleString()}</td>
-                                                    <td className="text-success">₹{(m.amountPaid || 0).toLocaleString()}</td>
-                                                    <td className="text-danger" style={{ fontWeight: 600 }}>
-                                                        ₹{(m.balanceDue || 0).toLocaleString()}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#666' }}>
+                                    No chart data available
                                 </div>
                             )}
-                        </Card>
-                    )}
-                </>
+                        </div>
+                    </Card>
+
+                    {/* Table/Card Section */}
+                    <Card title="Detailed Breakdown">
+                        {isMobile ? (
+                            <div className="mobile-list">
+                                {data.length === 0 ? (
+                                    <div className="text-center" style={{ padding: '2rem', color: 'var(--text-muted)' }}>No data available</div>
+                                ) : (
+                                    data.map((row) => (
+                                        <ReportMobileCard key={row.month} row={row} />
+                                    ))
+                                )}
+                            </div>
+                        ) : (
+                            <div className="table-container">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Month</th>
+                                            <th className="text-right">New Joinings</th>
+                                            <th className="text-right">Renewals</th>
+                                            <th className="text-right">Total Activity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={4} className="text-center" style={{ padding: '2rem' }}>No data available</td>
+                                            </tr>
+                                        ) : (
+                                            data.map((row) => (
+                                                <tr key={row.month}>
+                                                    <td style={{ fontWeight: 600 }}>{row.displayMonth}</td>
+                                                    <td className="text-right">
+                                                        <span className="badge badge-primary">{row.newMembers}</span>
+                                                    </td>
+                                                    <td className="text-right">
+                                                        <span className="badge badge-success">{row.renewals}</span>
+                                                    </td>
+                                                    <td className="text-right" style={{ fontWeight: 600 }}>
+                                                        {row.newMembers + row.renewals}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </Card>
+                </div>
             )}
         </div>
     );

@@ -171,6 +171,7 @@ h4 {
   .main-content {
     margin-left: 280px;
     padding: 2rem;
+    width: calc(100% - 280px);
     max-width: calc(100% - 280px);
   }
 }
@@ -539,11 +540,12 @@ h4 {
   box-shadow: var(--shadow-lg);
 }
 
-/* Desktop: Constrain card width for better design */
+/* Desktop: Constrain card width only for specific standalone pages if needed */
+/* Removing global max-width to allow grid layouts to function correctly */
 @media (min-width: 1024px) {
   .card {
-    max-width: 900px;
-    margin: 0 auto;
+    /* max-width removed */
+    margin: 0;
   }
 }
 
@@ -631,7 +633,11 @@ h4 {
   gap: 1.5rem;
 }
 
-@media (max-width: 1200px) {
+.content-grid>* {
+  min-width: 0;
+}
+
+@media (max-width: 1440px) {
   .content-grid {
     grid-template-columns: 1fr;
   }

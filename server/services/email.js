@@ -1,4 +1,4 @@
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,32 +8,33 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 // Set API Key
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-} else {
-  console.warn('⚠️ SENDGRID_API_KEY is missing in .env');
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'noreply@mfpvadamadurai.com';
+const FROM_EMAIL = process.env.EMAIL_FROM || 'support@mohammadrazak.xyz';
+
+if (!process.env.RESEND_API_KEY) {
+  console.warn('⚠️ RESEND_API_KEY is missing in .env');
+}
 
 // Helper to send email
 const sendEmail = async (to, subject, html) => {
-  const msg = {
-    to,
-    from: FROM_EMAIL,
-    subject,
-    html,
-  };
-
   try {
-    await sgMail.send(msg);
-    console.log(`✉️ Email sent to ${to}`);
-    return { success: true };
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error(`❌ Failed to send email to ${to}:`, error);
+      return { success: false, error };
+    }
+
+    console.log(`✉️ Email sent to ${to}, ID: ${data.id}`);
+    return { success: true, data };
   } catch (error) {
     console.error(`❌ Failed to send email to ${to}:`, error.message);
-    if (error.response) {
-      console.error(error.response.body);
-    }
     return { success: false, error: error.message };
   }
 };
@@ -44,7 +45,7 @@ export const sendExpiryReminder = async (member, daysLeft) => {
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #6366f1, #4f46e5); padding: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">🏋️ GymPro</h1>
+          <h1 style="color: white; margin: 0;">🏋️ MFP Vadamadurai</h1>
         </div>
         <div style="padding: 30px; background: #f8fafc;">
           <h2>Hi ${member.fullName}!</h2>
@@ -62,7 +63,7 @@ export const sendExpiryReminder = async (member, daysLeft) => {
           </a>
         </div>
         <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
-          <p>GymPro Management System</p>
+          <p>MFP Vadamadurai Management System</p>
         </div>
       </div>
     `;
@@ -100,12 +101,12 @@ export const sendOwnerNotification = async (expiringMembers) => {
         </table>
         
         <p style="color: #64748b; font-size: 12px;">
-          This is an automated report from GymPro Management System.
+          This is an automated report from MFP Vadamadurai Management System.
         </p>
       </div>
     `;
 
-  return sendEmail(process.env.OWNER_EMAIL || process.env.SENDGRID_FROM_EMAIL, subject, html);
+  return sendEmail(process.env.OWNER_EMAIL || process.env.EMAIL_FROM, subject, html);
 };
 
 // Send Payment Due notification
@@ -114,7 +115,7 @@ export const sendPaymentReminder = async (member) => {
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #f43f5e, #e11d48); padding: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">🏋️ GymPro</h1>
+          <h1 style="color: white; margin: 0;">🏋️ MFP Vadamadurai</h1>
         </div>
         <div style="padding: 30px; background: #f8fafc;">
           <h2>Hi ${member.fullName}!</h2>
@@ -128,7 +129,7 @@ export const sendPaymentReminder = async (member) => {
           <p>Please clear your dues at the reception to ensure uninterrupted access to the gym. Thank you for being a valued member!</p>
         </div>
         <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
-          <p>GymPro Management System</p>
+          <p>MFP Vadamadurai Management System</p>
         </div>
       </div>
     `;
@@ -138,11 +139,11 @@ export const sendPaymentReminder = async (member) => {
 
 // Send Welcome Email to New Member
 export const sendWelcomeEmail = async (member) => {
-  const subject = `🎉 Welcome to GymPro, ${member.fullName}!`;
+  const subject = `🎉 Welcome to MFP Vadamadurai, ${member.fullName}!`;
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">🏋️ GymPro</h1>
+          <h1 style="color: white; margin: 0;">🏋️ MFP Vadamadurai</h1>
         </div>
         <div style="padding: 30px; background: #f8fafc;">
           <h2>Welcome to the Family, ${member.fullName}! 🚀</h2>
@@ -168,7 +169,7 @@ export const sendWelcomeEmail = async (member) => {
           
         </div>
         <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
-          <p>GymPro Management System</p>
+          <p>MFP Vadamadurai Management System</p>
           <p>Vadamadurai</p>
         </div>
       </div>
@@ -183,7 +184,7 @@ export const sendExpiredNotification = async (member) => {
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">🏋️ GymPro</h1>
+          <h1 style="color: white; margin: 0;">🏋️ MFP Vadamadurai</h1>
         </div>
         <div style="padding: 30px; background: #f8fafc;">
           <h2>Hi ${member.fullName},</h2>
@@ -202,7 +203,7 @@ export const sendExpiredNotification = async (member) => {
           </a>
         </div>
         <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
-          <p>GymPro Management System</p>
+          <p>MFP Vadamadurai Management System</p>
         </div>
       </div>
     `;

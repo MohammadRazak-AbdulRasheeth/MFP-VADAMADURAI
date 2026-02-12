@@ -21,6 +21,12 @@ const paymentSchema = new mongoose.Schema({
     },
     notes: {
         type: String
+    },
+    category: {
+        type: String,
+        enum: ['ADMISSION', 'RENEWAL', 'GENERAL'],
+        default: 'GENERAL',
+        index: true
     }
 }, {
     timestamps: true

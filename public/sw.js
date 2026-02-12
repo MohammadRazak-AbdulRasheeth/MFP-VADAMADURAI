@@ -1,5 +1,5 @@
 /* Service Worker for MFP Gym Management App */
-const CACHE_NAME = 'mfp-gym-v1';
+const CACHE_NAME = 'mfp-gym-v2';
 const urlsToCache = [
   '/',
   '/index.html',
