@@ -1,0 +1,19 @@
+# Handle CORS at the Apache level (before Node.js)
+# This is required on Hostinger because Apache proxies requests to Node.js
+# and may block OPTIONS preflight requests
+
+<IfModule mod_headers.c>
+    # Allow CORS from portal domain
+    Header always set Access-Control-Allow-Origin "https://portal.mfpvadamadurai.com"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    Header always set Access-Control-Allow-Credentials "true"
+    Header always set Access-Control-Max-Age "86400"
+</IfModule>
+
+# Handle OPTIONS preflight requests directly at Apache level
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [R=200,L]
+</IfModule>
