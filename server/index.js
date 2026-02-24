@@ -23,28 +23,21 @@ app.use((req, res, next) => {
     next();
 });
 
-// Middleware with detailed logging
+// CORS Middleware (JWT-based auth, no credentials needed)
 app.use(cors({
-    origin: (origin, callback) => {
-        const allowed = [
-            process.env.FRONTEND_URL,
-            'http://localhost:5173',
-            'http://localhost:5174'
-        ].filter(Boolean);
-
-        console.log(`[CORS DEBUG] Request Origin: ${origin}`);
-        console.log(`[CORS DEBUG] Allowed Origins: ${allowed.join(', ')}`);
-
-        if (!origin || allowed.includes(origin)) {
-            callback(null, true);
-        } else {
-            console.warn(`[CORS WARNING] Origin ${origin} not specifically allowed, but reflecting for debug`);
-            callback(null, true); // Allow for now to debug
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+    origin: [
+        'https://portal.mfpvadamadurai.com',
+        'http://localhost:5173',
+        'http://localhost:5174'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
 app.use(express.json());
 
 // MongoDB Atlas Connection
